@@ -1,0 +1,44 @@
+@startuml
+
+class acl_sid {
+    + id : bigint {PK}
+    + principal : boolean {NOT NULL}
+    + sid : varchar_ignorecase(100) {NOT NULL}
+    -- unique(sid, principal)
+}
+
+class acl_class {
+    + id : bigint {PK}
+    + class : varchar_ignorecase(100) {NOT NULL}
+    -- unique(class)
+}
+
+class acl_object_identity {
+    + id : bigint {PK}
+    + object_id_class : bigint {NOT NULL}
+    + object_id_identity : bigint {NOT NULL}
+    + parent_object : bigint
+    + owner_sid : bigint
+    + entries_inheriting : boolean {NOT NULL}
+    -- unique(object_id_class, object_id_identity)
+}
+
+class acl_entry {
+    + id : bigint {PK}
+    + acl_object_identity : bigint {NOT NULL}
+    + ace_order : int {NOT NULL}
+    + sid : bigint {NOT NULL}
+    + mask : integer {NOT NULL}
+    + granting : boolean {NOT NULL}
+    + audit_success : boolean {NOT NULL}
+    + audit_failure : boolean {NOT NULL}
+    -- unique(acl_object_identity, ace_order)
+}
+
+acl_object_identity --> acl_sid : owner_sid {FK}
+acl_object_identity --> acl_class : object_id_class {FK}
+acl_object_identity --> acl_object_identity : parent_object {FK}
+acl_entry --> acl_object_identity : acl_object_identity {FK}
+acl_entry --> acl_sid : sid {FK}
+
+@enduml
